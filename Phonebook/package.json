@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/dmcr/FullStackOpen3/issues"
   },
-  "homepage": "https://github.com/dmcr/FullStackOpen3#readme"
+  "homepage": "https://github.com/dmcr/FullStackOpen3#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
 }
