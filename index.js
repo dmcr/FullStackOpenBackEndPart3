@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const mongoose = require('mongoose')
 
 const app = express()
 app.use(cors())
@@ -19,6 +21,9 @@ morgan.token('postContent', (req, res) => {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postContent'))
 
+const url = process.env.MONGODB_URI
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true})
+
 let persons = [
     {
         name: "name1",
@@ -36,10 +41,29 @@ let persons = [
         id: 3
     }
 ]
+const personSchema = new mongoose.Schema({
+    name: String,
+    number: String
+})
+personSchema.set('toJSON', {
+    transform: (document, returnedObject) => {
+        returnedObject.id = returnedObject._id.toString()
+        delete returnedObject._id
+        delete returnedObject.__v
+    }
+})
+const Person = mongoose.model('Person', personSchema)
+
+const generateId = () => {
+    const maxId = persons.length > 0 ? Math.max(...persons.map(person => person.id)) + 1 : 0
+    return maxId
+}
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
-})
+    Person.find({}).then(people => {
+        res.json(people.map(person => person.toJSON()))
+    });
+});
 
 app.get('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id)
@@ -74,11 +98,6 @@ app.post('/api/persons', (req, res) => {
     persons = persons.concat(person)
     res.json(person)
 })
-
-const generateId = () => {
-    const maxId = persons.length > 0 ? Math.max(...persons.map(person => person.id)) + 1 : 0
-    return maxId
-}
 
 app.delete('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id)
