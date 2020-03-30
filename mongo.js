@@ -7,7 +7,7 @@ if (process.argv.length<3) {
 }
 const password = process.argv[2]
 const url = `mongodb+srv://fullstack:${password}@phonebook-lxoat.mongodb.net/person-app?retryWrites=true&w=majority`
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
 const personSchema = new mongoose.Schema({
     name: String,
@@ -25,10 +25,7 @@ if (process.argv.length === 3) {
 else {
     const newName = process.argv[3]
     const newNumber = process.argv[4]
-    const person = new Person({
-    name: String(newName),
-    number: String(newNumber)
-    })
+    const person = new Person({ name: String(newName), number: String(newNumber) })
 
     person.save().then(res => {
         console.log(`Added ${res.name} number ${res.number} to phonebook`)

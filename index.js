@@ -2,14 +2,13 @@ require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
-const mongoose = require('mongoose')
 const Person = require('./models/person')
 
 const app = express()
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
-morgan.token('postContent', (req, res) => {
+morgan.token('postContent', (req) => {
     const body = req.body
     if (!body.name) return ''
     return `{
@@ -19,7 +18,7 @@ morgan.token('postContent', (req, res) => {
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postContent'))
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
     Person.find({})
         .then(people => people.map(person => person.toJSON()))
         .then(peopleJson => res.json(peopleJson))
@@ -30,9 +29,9 @@ app.get('/api/persons/:id', (req, res, next) => {
     Person
         .findById(req.params.id)
         .then(person => {
-            if (person) 
+            if (person)
                 res.json(person.toJSON())
-            else 
+            else
                 res.status(404).end()
         })
         .catch(error => next(error))
@@ -69,7 +68,7 @@ app.put('/api/persons/:id', (req, res, next) => {
 app.delete('/api/persons/:id', (req, res, next) => {
     Person
         .findByIdAndRemove(req.params.id)
-        .then(result => res.status(204).end())
+        .then(res.status(204).end())
         .catch(err => next(err))
 })
 
@@ -77,7 +76,7 @@ const errorHandler = (error, request, response, next) => {
     console.log(error.message)
 
     if (error.name === 'CastError' && error.kind === 'ObjectId') {
-        return response.status(400).send({error: 'malformatted id'})
+        return response.status(400).send({ error: 'malformatted id' })
     }
     else if (error.name === 'ValidationError') {
         return response.status(400).json({ 'error': error.message })
